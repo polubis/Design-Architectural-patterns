@@ -4,7 +4,7 @@
 
 ### DRY - Don't Repeat Yourself
 
-"DRY is a guideline, not a religion. Those who take it to the point of DRY above all else, have taken it too far."
+*"DRY is a guideline, not a religion. Those who take it to the point of DRY above all else, have taken it too far."*
 
 Repeating the same code in the application may considerably take longer to make the necessary changes and may cause bugs - but not always.
 
