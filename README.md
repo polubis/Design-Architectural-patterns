@@ -8,7 +8,7 @@
 
 Repeating the same code in the application may considerably take longer to make the necessary changes and may cause bugs.
 
-> DRY FRIENDLY
+> OK
 ```scss
 @mixin text {
   font-family: $fontPrimary;
@@ -81,8 +81,7 @@ h2 {
 // in datepicker.scss
 ```
 
-> DRY
-
+> OK
 ```ts
 const CONTROLLER = 'Account';
 
@@ -92,7 +91,6 @@ const GET_SELF = `${CONTROLLER}/GetCurrentUserData`;
 ```
 
 > NOT PERFECT BUT STILL OK
-
 ```ts
 const FORGOTTEN_PASSWORD = 'Account/ForgottenPassword';
 const REGISTER = 'Account/Register';
@@ -100,7 +98,6 @@ const GET_SELF = 'Account/GetCurrentUserData';
 ```
 
 > BAD - code is complicated
-
 ```ts
 export const [FORGOTTEN_PASSWORD, REGISTER, GET_SELF] = makePaths('Account')(
   'ForgottenPassword',
@@ -113,6 +110,111 @@ export const [GET_PATTERNS, EDIT_PATTERN, ADD_PATTERN, GET_PATTERN, DELETE_PATTE
 )('Search', 'Update', 'Add', 'Get', 'Delete');
 ```
 
+> OK
+```ts
+const isAdmin = (roles: string[]): boolean => roles.includes(UserRole.Admin);
+
+const renderChildren = (
+  children: JSX.Element | Guard.Children.RenderProp,
+  state: AuthProvider.State
+): JSX.Element => (typeof children === 'function' ? children(state) : children);
+
+const Admin = ({ children }: Guard.Props) => {
+  const { pending, authorized, ...state } = useAuthProvider();
+  
+  return pending
+    ? null
+    : authorized
+    ? isAdmin(state.user.roles)
+      ? renderChildren(children, state)
+      : null
+    : null;
+};
+
+const Protected = ({ children }: Guard.Props) => {
+  const { pending, authorized, ...state } = useAuthProvider();
+
+  return pending ? null : authorized ? renderChildren(children, state) : null;
+};
+
+const Unprotected = ({ children }: Guard.Props) => {
+  const { pending, authorized, ...state } = useAuthProvider();
+
+  return pending ? null : authorized ? null : renderChildren(children, state);
+};
+```
+
+> NOT PERFECT BUT STILL OK
+```ts
+const Admin = ({ children }: Guard.Props) => {
+  const { pending, authorized, ...state } = useAuthProvider();
+
+  return pending
+    ? null
+    : authorized
+    ? state.user.roles.includes(UserRole.Admin)
+      ? typeof children === 'function'
+        ? children(state)
+        : children
+      : null
+    : null;
+};
+
+const Protected = ({ children }: Guard.Props) => {
+  const { pending, authorized, ...state } = useAuthProvider();
+
+  return pending
+    ? null
+    : authorized
+    ? typeof children === 'function'
+      ? children(state)
+      : children
+    : null;
+};
+```
+
+> BAD
+```ts
+const Admin = ({ children }: Guard.Props) => {
+  const { pending, authorized, ...state } = useAuthProvider();
+
+  return pending
+    ? null
+    : authorized
+    ? state.user.roles.includes(UserRole.Admin)
+      ? typeof children === 'function'
+        ? children(state)
+        : children
+      : null
+    : null;
+};
+
+const Protected = ({ children }: Guard.Props) => {
+  const { pending, authorized, ...state } = useAuthProvider();
+
+  return pending
+    ? null
+    : authorized
+    ? typeof children === 'function'
+      ? children(state)
+      : children
+    : null;
+};
+
+const Unprotected = ({ children }: Guard.Props) => {
+  const { pending, authorized, ...state } = useAuthProvider();
+
+  return pending
+    ? null
+    : authorized
+    ? null
+    : typeof children === 'function'
+    ? children(state)
+    : children;
+};
+
+// and 5 more guard types 
+```
 
 ### KISS
 
