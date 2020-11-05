@@ -261,6 +261,120 @@ describe('on failure', () => {
 });
 ```
 
+#### Worst case - duplicated business logic
+
+There is no **ACCEPTABLE** case. Whenever you duplicate a business logic - you are doing something wrong
+
+> BAD - only difference in view layer - business logic code duplicated. Hard to track bugs
+```ts
+  const FormVariantA = () => {
+    const {
+      params: { id }
+    } = useRouteMatch<{ id: string }>();
+
+    const history = useHistory();
+
+    const [state, setState] = useState(STATE);
+
+    const handleManagement = useCallback(async (formManagers: Form.Manager[]) => {
+      setState({ ...STATE, pending: true });
+
+      try {
+        const payload = makePayload(formManagers);
+
+        if (id) {
+          await editTemplate(id, payload);
+          setState({ ...STATE, id });
+        } else {
+          const addedTemplateId = await addTemplate(payload);
+          setState({ ...STATE, id: addedTemplateId });
+        }
+      } catch {
+        setState({ ...STATE });
+      }
+    }, []);
+
+    useEffect(() => {
+      if (state.id) {
+        history.replace(`/app/templates/${TemplateCategory.ALL}/${state.id}`);
+      }
+    }, [state.id]);
+  }
+  
+  const FormVariantB = () => {
+    const {
+      params: { id }
+    } = useRouteMatch<{ id: string }>();
+
+    const history = useHistory();
+
+    const [state, setState] = useState(STATE);
+
+    const handleManagement = useCallback(async (formManagers: Form.Manager[]) => {
+      setState({ ...STATE, pending: true });
+
+      try {
+        const payload = makePayload(formManagers);
+
+        if (id) {
+          await editTemplate(id, payload);
+          setState({ ...STATE, id });
+        } else {
+          const addedTemplateId = await addTemplate(payload);
+          setState({ ...STATE, id: addedTemplateId });
+        }
+      } catch {
+        setState({ ...STATE });
+      }
+    }, []);
+
+    useEffect(() => {
+      if (state.id) {
+        history.replace(`/app/templates/${TemplateCategory.ALL}/${state.id}`);
+      }
+    }, [state.id]);
+  }
+```
+
+> OK - logic grouped in hook - easy to use between different components
+```ts
+export const useTemplateManagement = (): Return => {
+  const {
+    params: { id }
+  } = useRouteMatch<{ id: string }>();
+
+  const history = useHistory();
+
+  const [state, setState] = useState(STATE);
+
+  const handleManagement = useCallback(async (formManagers: Form.Manager[]) => {
+    setState({ ...STATE, pending: true });
+
+    try {
+      const payload = makePayload(formManagers);
+
+      if (id) {
+        await editTemplate(id, payload);
+        setState({ ...STATE, id });
+      } else {
+        const addedTemplateId = await addTemplate(payload);
+        setState({ ...STATE, id: addedTemplateId });
+      }
+    } catch {
+      setState({ ...STATE });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (state.id) {
+      history.replace(`/app/templates/${TemplateCategory.ALL}/${state.id}`);
+    }
+  }, [state.id]);
+
+  return [state, handleManagement];
+};
+```
+
 ### KISS
 
 ### Code Against Interfaces, Not Implementations
