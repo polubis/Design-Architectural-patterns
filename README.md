@@ -94,9 +94,9 @@ const GET_SELF = `${CONTROLLER}/GetCurrentUserData`;
 > NOT PERFECT BUT STILL OK
 
 ```ts
-const FORGOTTEN_PASSWORD = 'api/Account/ForgottenPassword';
-const REGISTER = 'api/Account/Register';
-const GET_SELF = 'api/Account/GetCurrentUserData';
+const FORGOTTEN_PASSWORD = 'Account/ForgottenPassword';
+const REGISTER = 'Account/Register';
+const GET_SELF = 'Account/GetCurrentUserData';
 ```
 
 > BAD - code is complicated
