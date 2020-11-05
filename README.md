@@ -4,6 +4,8 @@
 
 ### DRY - Don't Repeat Yourself
 
+![DRY](https://www.flaticon.com/svg/static/icons/svg/2654/2654602.svg)
+
 *"DRY is a guideline, not a religion. Those who take it to the point of DRY above all else, have taken it too far."*
 
 Repeating the same code in the application may considerably take longer to make the necessary changes and may cause bugs - but not always.
@@ -384,6 +386,40 @@ const FormVariantB = () => {
 ```
 
 ### KISS
+
+![KISS](https://www.flaticon.com/svg/static/icons/svg/75/75559.svg)
+
+*"The code is so simple that even a cockroach can understand it"*
+
+Some of the articles, especially those with examples from js, describe kiss as differences between the syntax of different standards - this is a misunderstanding.
+
+#### This is not KISS issue - just different syntax
+
+> OK
+```ts
+function calc(a, b) {
+   return a + b;
+}
+```
+
+> OK
+```ts
+const calc = (a, b) => a + b;
+```
+
+#### Overcomplicated code
+
+> BAD - **closures / currying** are really good - but not in this case - this is used without any purpose
+```ts
+  const add = a => b => c => a + b + c + d;
+  add(5)(5)(5)(5) // 20
+```
+
+> OK - simple intuitive code, generic approach
+```ts
+  const add = (...args) => args.reduce((acc, arg) => acc + arg, 0);
+  add(5,5,5,5) // 20
+```
 
 ### Code Against Interfaces, Not Implementations
 
