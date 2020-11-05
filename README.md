@@ -38,7 +38,7 @@ h2 {
 // in datepicker.scss
 ```
 
-> NOT PERFECT BUT STILL OK - duplication only in two files
+> ACCEPTABLE - duplication only in two files
 ```scss
 // in modal.scss
 h2 {
@@ -98,7 +98,7 @@ export const [GET_PATTERNS, EDIT_PATTERN, ADD_PATTERN, GET_PATTERN, DELETE_PATTE
 )('Search', 'Update', 'Add', 'Get', 'Delete');
 ```
 
-> NOT PERFECT BUT STILL OK - duplication easy to change via code editor
+> ACCEPTABLE - duplication easy to change via code editor
 ```ts
 const FORGOTTEN_PASSWORD = 'Account/ForgottenPassword';
 const REGISTER = 'Account/Register';
@@ -159,7 +159,7 @@ const Unprotected = ({ children }: Guard.Props) => {
 // and 5 more guard types 
 ```
 
-> NOT PERFECT BUT STILL OK - some code duplication / but only in two places so who cares
+> ACCEPTABLE - some code duplication / but only in two places so who cares
 ```ts
 const Admin = ({ children }: Guard.Props) => {
   const { pending, authorized, ...state } = useAuthProvider();
@@ -220,6 +220,45 @@ const Unprotected = ({ children }: Guard.Props) => {
 
   return pending ? null : authorized ? null : renderChildren(children, state);
 };
+```
+
+#### Tests
+
+> BAD - **should** and **correctly** keywords not needed
+```ts
+it('should create component correctly', () => {});
+it('should add className correctly', () => {});
+it('should combine children correctly', () => {});
+it('should save user after success response', () => {});
+it('should off loader after success response', () => {});
+it('should off redirect after success response', () => {});
+it('should show error dialog after failure response', () => {});
+```
+
+> ACCEPTABLE - **should** and **correctly** keywords removed
+```ts
+it('creates component', () => {});
+it('adds className', () => {});
+it('combines children', () => {});
+it('saves user after success response', () => {});
+it('hides loader after success response', () => {});
+it('redirects after success response', () => {});
+it('shows error dialog after failure response', () => {});
+```
+
+> OK - tests grouped / duplicated text removed / easy to read
+```ts
+it('creates component', () => {});
+it('adds className', () => {});
+it('combines children', () => {});
+describe('on success', () => {
+  it('saves user', () => {});
+  it('hides loader', () => {});
+  it('redirects', () => {});
+});
+describe('on failure', () => {
+  it('shows error dialog', () => {});
+});
 ```
 
 ### KISS
