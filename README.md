@@ -4,7 +4,7 @@
 
 ### DRY - Don't Repeat Yourself
 
-![DRY](https://www.flaticon.com/svg/static/icons/svg/2654/2654602.svg)
+![DRY](https://www.flaticon.com/svg/static/icons/svg/2654/2654602.svg){:height="48px" width="48px"}
 
 *"DRY is a guideline, not a religion. Those who take it to the point of DRY above all else, have taken it too far."*
 
@@ -387,7 +387,7 @@ const FormVariantB = () => {
 
 ### KISS
 
-![KISS](https://www.flaticon.com/svg/static/icons/svg/75/75559.svg)
+![KISS](https://www.flaticon.com/svg/static/icons/svg/75/75559.svg){:height="48px" width="48px"}
 
 *"The code is so simple that even a cockroach can understand it"*
 
