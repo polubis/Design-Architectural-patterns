@@ -373,6 +373,14 @@ export const useTemplateManagement = (): Return => {
 
   return [state, handleManagement];
 };
+
+const FormVariantA = () => {
+   useTemplateManagement();
+}
+
+const FormVariantB = () => {
+  useTemplateManagement();
+}
 ```
 
 ### KISS
