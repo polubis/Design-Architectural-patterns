@@ -81,6 +81,39 @@ h2 {
 // in datepicker.scss
 ```
 
+> DRY
+
+```ts
+const CONTROLLER = 'Account';
+
+const FORGOTTEN_PASSWORD = `${CONTROLLER}/ForgottenPassword`;
+const REGISTER = `${CONTROLLER}/Register`;
+const GET_SELF = `${CONTROLLER}/GetCurrentUserData`;
+```
+
+> NOT PERFECT BUT STILL OK
+
+```ts
+const FORGOTTEN_PASSWORD = 'api/Account/ForgottenPassword';
+const REGISTER = 'api/Account/Register';
+const GET_SELF = 'api/Account/GetCurrentUserData';
+```
+
+> BAD - code is complicated
+
+```ts
+export const [FORGOTTEN_PASSWORD, REGISTER, GET_SELF] = makePaths('Account')(
+  'ForgottenPassword',
+  'Register',
+  'GetCurrentUserData'
+);
+
+export const [GET_PATTERNS, EDIT_PATTERN, ADD_PATTERN, GET_PATTERN, DELETE_PATTERN] = makePaths(
+  'TemplatePatterns'
+)('Search', 'Update', 'Add', 'Get', 'Delete');
+```
+
+
 ### KISS
 
 ### Code Against Interfaces, Not Implementations
