@@ -751,7 +751,7 @@ const handleSaveUser = (type: UserType) => {
 
 ##### Module doing too many things
 
-> BAD - module have 2 responsibilities - error handling and display hard coded component
+> BAD - module have 2 responsibilities - error handling and display hard coded component - determines component look
 ```ts
 namespace ErrorBoundary {
   export interface Props {
@@ -818,7 +818,7 @@ export default ErrorBoundary;
 <ErrorBoundary><Component /></ErrorBoundary>
 ```
 
-> OK - presentational component is injected via props
+> OK - presentational component is injected via props - only one job handle error
 ```ts
 namespace ErrorBoundary {
   export interface Props {
