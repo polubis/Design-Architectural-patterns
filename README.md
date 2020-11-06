@@ -568,6 +568,8 @@ export const ThemedButton: Button = (props) => {
 
 #### SRP - Single responsiblity principal
 
+<img src="https://www.flaticon.com/svg/static/icons/svg/1021/1021098.svg" height="48" width="48">
+
 *"ALL WE HAD TO DO WAS FOLLOW THE DAMN TRAIN CJ"*
 
 `class`, `function`, `module` should only have one job.
@@ -876,5 +878,149 @@ export default ErrorBoundary;
 // usage
 <ErrorBoundary fallback={ErrorScreen}><Component /></ErrorBoundary>
 ```
+
+#### Open/closed principle - Open for extenstion / closed for modification
+
+<img src="https://www.flaticon.com/premium-icon/icons/svg/1376/1376390.svg" height="48" width="48">
+
+*"Imagine you have a bad employee. It is much easier to find a new one than to teach someone with bad habits. The person with bad habits is implementation."*
+
+Objects or entities should be open for extension, but closed for modification. The goal is to make the system easy to extend without incurring a high impact of change. Software systems must be allowed to change their behavior by adding new code rather than changing the existing code.
+
+##### Hello world examples
+
+> BAD - there is not option to add new user dynamically - closed for extension
+```ts
+export const usersManager = () => {
+  const users = ['Piotr', 'Pawel', 'Adam'];
+  
+  return {
+    users
+  }
+};
+```
+
+> OK - open for extension - we can add users dynamically via `add` method
+```ts
+export const usersManager = () => {
+  let users = ['Piotr', 'Pawel', 'Adam'];
+  
+  return {
+    users,
+    add: (user: string) => {
+      users = [...users, user];
+    }
+  }
+};
+```
+
+##### Bucket feature
+
+> BAD - only one formatter allowed - if we would like to change formatter behaviour we need to open this file and add changes. Also this can break all current `Bucket` base features because we need this change only in once place
+```ts
+interface Item {
+    id: number;
+    name: string;
+    price: number;
+}
+
+class Bucket {
+    items: Item[] = [];
+
+    private _formatPrice(price: number): number {
+        return +price.toFixed(2)
+    }
+
+    add(item: Item): void {
+        this.items = [...this.items, { ...item, price: this._formatPrice(item.price) }];
+    }
+}
+```
+
+> OK - Option to provide custom formatter added. If we need to change formatting style - just adding different formatting via constructor. 
+```ts
+interface Item {
+    id: number;
+    name: string;
+    price: number;
+}
+
+type Formatter = (price: number) => number;
+
+class Bucket {
+    items: Item[] = [];
+
+    constructor(private _formatter: Formatter) {}
+
+    add(item: Item): void {
+        this.items = [...this.items, { ...item, price: this._formatter(item.price) }];
+    }
+}
+```
+
+##### List component in React
+
+> BAD - current implementation allows to use only one type of list item. If designer add different type i need to change implementation of this component.
+```ts
+interface ListProps {
+  items: { label: string }[];
+}
+
+const List = ({ items }: ListProps) => {
+  return (
+    <ul>
+      {items.map((item, i) => (
+        <li key={i}>{item.label}</li>
+      ))}
+    </ul>
+  );
+};
+
+// first.tsx
+<List items={items} />
+
+// second.tsx
+<List items={items} />
+
+// third.tsx - ups different list type needed - new <List> component or implementation change required
+<List items={items} />
+```
+
+> OK - if we need new list type - we just passing Component / Function as a children - no changes required in implementation
+```ts
+export interface ListItem {
+  label: string;
+}
+
+export type ListItemComponent = (props: ListItem) => JSX.Element;
+
+export interface ListProps {
+  children: ListItemComponent;
+  items: ListItem[];
+}
+
+const ListItem: ListItemComponent = ({ label }) => <li>{label}</li>;
+
+export const List = ({ children = ListItem, items }: ListProps) => {
+  return (
+    <ul>
+      {items.map((item, i) => (
+        <React.Fragment key={i}>{children(item)}</React.Fragment>
+      ))}
+    </ul>
+  );
+};
+
+// first.tsx
+<List items={items} />
+
+// second.tsx
+<List items={items} />
+
+// third.tsx 
+<List children={MyOwnChildren} items={items} />
+```
+
+##### Component 
 
 ### Composition over inheritance
