@@ -472,7 +472,7 @@ const user: IUser = new User('piotr', 'I like programming');
 
 #### Coupled code issue - problems with refactor / implementation change
 
-// BAD - class `Car` rely on implementation - if `DriveManager` implementation changes, `n` files behaviour changed
+> BAD - class `Car` rely on implementation - if `DriveManager` implementation changes, `n` files behaviour changed
 ```ts
   class Car {
     drive = new DriveManager();
@@ -486,7 +486,7 @@ const user: IUser = new User('piotr', 'I like programming');
   const car = new Car();
 ```
 
-// OK - class `Car` rely on `interface` - if `DriveManager` implementation changes, only 1 file affected
+> OK - class `Car` rely on `interface` - if `DriveManager` implementation changes, only 1 file affected
 ```ts
  interface DriveAble {
    drive(): void;
