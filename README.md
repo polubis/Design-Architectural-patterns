@@ -389,7 +389,7 @@ const FormVariantB = () => {
 
 <img src="https://www.flaticon.com/svg/static/icons/svg/75/75559.svg" height="48" width="48">
 
-*"The code is so simple that even a cockroach can understand it"*
+*"The code is so simple that even a cockroach can understand it."*
 
 Some of the articles, especially those with examples from js, describe kiss as differences between the syntax of different standards - this is a misunderstanding.
 
@@ -422,6 +422,143 @@ const calc = (a, b) => a + b;
 ```
 
 ### Code Against Interfaces, Not Implementations
+
+*"The more loosely coupled your code is, the less likely it is that a change in one place will affect code in another."*
+
+*"You can replace the implementation with a better one without breaking anything."*
+
+*"Focusing on what code doesn, not how code is implemented"*.
+
+#### Issue example
+
+> BAD - rely on **implementation**
+```ts
+class User {
+   constructor(public name: string, public description: string) {}
+}
+
+// file.ts
+const user = new User('piotr', 'I like programming');
+
+// second-file.ts
+const user = new User('piotr', 'I like programming');
+
+// third-file.ts
+const user = new User('piotr', 'I like programming');
+```
+
+> OK - rely on `interface`
+```ts
+interface IUser {
+  name: string;
+  description: string;
+}
+
+class User implements IUser {
+   constructor(public name: string, public description: string) {}
+}
+
+// file.ts
+const user: IUser = new User('piotr', 'I like programming');
+
+// second-file.ts
+const user: IUser = new User('piotr', 'I like programming');
+
+// third-file.ts
+const user: IUser = new User('piotr', 'I like programming');
+```
+
+#### Coupled code issue - problems with refactor / implementation change
+
+// BAD - class `Car` rely on implementation - if `DriveManager` implementation changes, `n` files behaviour changed
+```ts
+  class Car {
+    drive = new DriveManager();
+  }
+  
+  // file.ts
+  const car = new Car();
+  // file2.ts
+  const car = new Car();
+  // file3.ts
+  const car = new Car();
+```
+
+// OK - class `Car` rely on `interface` - if `DriveManager` implementation changes, only 1 file affected
+```ts
+ interface DriveAble {
+   drive(): void;
+ }
+ 
+ class Car {
+    constructor(public drive: DriveAble){}
+ }
+ 
+ // file.ts
+  const car = new Car(new DriveManager());
+ // file2.ts
+  const car = new Nissan(new HondaDriveManager());
+ // file3.ts
+  const car = new Volvo(new VolvoDriveManager());
+```
+
+#### React components issue
+
+> BAD - if you change ButtonType enum or implementation inside button component - ui will be broken
+```ts
+enum ButtonType = {
+  PRIMARY = 'primary',
+  SECONDARY = 'secondary'
+}
+
+export const Button = ({ type }) => {
+  const theme = useTheme();
+
+  return (
+    <button className={`btn ${theme ? theme : ButtonType[type]}`}></button>
+  )
+}
+
+// parent-component.ts
+<Button type={ButtonType.PRIMARY}></Button>
+// second-parent-component.ts
+<Button type={ButtonType.SECONDARY}></Button>
+// third-parent-component.ts
+<Button></Button>
+```
+
+> OK - rely on interface. Low risk of spoiling something during changes. Much easier to refactor, better performance, lower bundle size. Code is tree-shakable.
+```ts
+type BaseButtonProps = React.DetailedHTMLProps<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    HTMLButtonElement
+>;
+
+interface ButtonProps extends BaseButtonProps {}
+
+export type Button = (props: ButtonProps) => JSX.Element;
+
+export const PrimaryButton: Button = (props) => <button { ...props } className={`btn primary ${props.className}`}></button>
+
+export const SecondaryButton: Button = (props) => <button { ...props } className={`btn primary ${props.className}`}></button>
+
+export const ThemedButton: Button = (props) => {
+    const theme = useTheme();
+
+    return (
+        <button { ...props } className={`btn primary ${props.className}`} style={theme}></button>
+    )
+}
+
+// parent-component.ts
+<PrimaryButton />
+// second-parent-component.ts
+<SecondaryButton />
+// third-parent-component.ts
+<ThemedButton />
+// fourth-parent-component.ts
+<MyOwnButtonWhichImplementsButtonInterface />
+```
 
 ### SOLID
 
