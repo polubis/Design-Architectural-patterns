@@ -1023,6 +1023,7 @@ export const List = ({ children = ListItem, items }: ListProps) => {
 
 #### Liskov substitution principle
 
+
 <img src="https://www.flaticon.com/premium-icon/icons/svg/2566/2566163.svg" height="48" width="48">
 
 *"Your bathtub has a leak. You call the plumber and he puts the seal on. Then your father comes and says, Lord, who pays for these things. He removes the earlier plumber and the heat sink in the pipes for some reason. Looks like it works but after hour your neighbor has a swimming pool in the apartment."*
