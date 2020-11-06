@@ -732,6 +732,8 @@ const getPath = (type) => {
         [UserType.CONTENT_MANAGER]: 'cm',
         [UserType.SUPER_ADMIN]: 'sa',
     };
+    
+    throw new Error(`No path for given ${type} type`);
 
     return paths[type];
 }
@@ -744,9 +746,135 @@ const parsePayload = (userData: Object) => ({
 const handleSaveUser = (type: UserType) => {
     initialize();
     saveUser(getPath(type), parsePayload(userData)).then(handleSucces, handleError);
-
-    throw new Error(`No implementation for given ${type} type`);
 }
+```
+
+##### Module doing too many things
+
+> BAD - module have 2 responsibilities - error handling and display hard coded component
+```ts
+namespace ErrorBoundary {
+  export interface Props {
+    children: ReactNode;
+  }
+
+  export interface Error {
+    name: string;
+    message: string;
+    componentStack: string;
+    occuredAt: Date;
+  }
+
+  export interface State {
+    hasError: boolean;
+  }
+}
+
+const STATE: ErrorBoundary.State = {
+  hasError: false
+};
+
+class ErrorBoundary extends Component<ErrorBoundary.Props, typeof STATE> {
+  state = STATE;
+
+  readonly errors: ErrorBoundary.Error[] = [];
+
+  static getDerivedStateFromError(): ErrorBoundary.State {
+    return { hasError: true };
+  }
+
+  componentDidCatch({ name, message }: Error, { componentStack }: ErrorInfo) {
+    const error: ErrorBoundary.Error = {
+      name,
+      message,
+      componentStack,
+      occuredAt: new Date()
+    };
+
+    this.errors.push(error);
+  }
+
+  handleReload = () => {
+    window.location.reload();
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Modal>
+          <h5>Oops, something went wrong.</h5>
+          <Button onClick={this.handleReload}>RELOAD</Button>
+        </Modal>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+export default ErrorBoundary;
+
+// usage
+<ErrorBoundary><Component /></ErrorBoundary>
+```
+
+> OK - presentational component is injected via props
+```ts
+namespace ErrorBoundary {
+  export interface Props {
+    children: ReactNode;
+    fallback: (state: State) => JSX.Element;
+  }
+
+  export interface Error {
+    name: string;
+    message: string;
+    componentStack: string;
+    occuredAt: Date;
+  }
+
+  export interface State {
+    hasError: boolean;
+  }
+}
+
+const STATE: ErrorBoundary.State = {
+  hasError: false
+};
+
+class ErrorBoundary extends Component<ErrorBoundary.Props, typeof STATE> {
+  state = STATE;
+
+  readonly errors: ErrorBoundary.Error[] = [];
+
+  static getDerivedStateFromError(): ErrorBoundary.State {
+    return { hasError: true };
+  }
+
+  componentDidCatch({ name, message }: Error, { componentStack }: ErrorInfo) {
+    const error: ErrorBoundary.Error = {
+      name,
+      message,
+      componentStack,
+      occuredAt: new Date()
+    };
+
+    this.errors.push(error);
+  }
+
+  handleReload = () => {
+    window.location.reload();
+  };
+
+  render() {
+    return this.state.hasError ? this.props.fallback(this.state) : this.props.children;
+  }
+}
+
+export default ErrorBoundary;
+
+// usage
+<ErrorBoundary fallback={ErrorScreen}><Component /></ErrorBoundary>
 ```
 
 ### Composition over inheritance
