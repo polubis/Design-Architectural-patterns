@@ -564,4 +564,189 @@ export const ThemedButton: Button = (props) => {
 
 ### SOLID
 
+<img src="https://www.flaticon.com/premium-icon/icons/svg/2913/2913995.svg" height="48" width="48">
+
+#### SRP - Single responsiblity principal
+
+*"ALL WE HAD TO DO WAS FOLLOW THE DAMN TRAIN CJ"*
+
+`class`, `function`, `module`, `object` should only have one job.
+
+##### One class doing too many things
+
+> BAD - class `User` doing 2 things - loads user data and holds user information
+```ts
+class User {
+    name: string;
+    email: string;
+
+    constructor() { }
+    
+    loadUser(): Promise<User> { 
+        return new Promise((resolve) => { 
+            resolve({ name: 'Piotr', email: 'piotr1994@gmail.com' } as User);
+        })
+    }
+
+    setUser(name: string, email: string): void {
+        this.name = name;
+        this.email = email
+    }
+}
+
+const user = new User();
+user.loadUser().then(({ name, email }) => {
+    user.setUser(name, email);
+    
+    console.log(user.name);
+    console.log(user.email);
+});
+```
+
+> OK - `User` interface only represents model. Repository allows to get data from api or db. `UserController` manages whole logic.
+```ts
+interface User {
+    name: string;
+    email: string;
+}
+
+type Repository<T> = Partial<{
+    load(): Promise<T>;
+}>;
+
+class UserRepository implements Repository<User> {
+    load(): Promise<User> {
+        return new Promise((resolve) => {
+            resolve({ name: 'Piotr', email: 'piotr1994@gmail.com' } as User);
+        })
+    }
+}
+
+class UserController {
+    user: User | null = null;
+
+    constructor(public repo: UserRepository) { }
+
+    handleLoadUser(): Promise<User> {
+        return new Promise(async (resolve) => {
+            this.user = await this.repo.load();
+
+            resolve(this.user);
+        })
+    }
+}
+
+const userController = new UserController(new UserRepository());
+userController.handleLoadUser().then((user) => {
+    console.log(user);
+});
+```
+
+##### Function doing too many things
+
+> BAD - The function has 3 responsibilities. Manages entire process of adding a user, deals with API processing and payload formatting
+```ts
+enum UserType {
+    ADMIN = 'ADMIN',
+    CONTENT_MANAGER = 'CONTENT_MANAGER',
+    SUPER_ADMIN = 'SUPER_ADMIN'
+}
+
+const handleSaveUser = async (type: UserType) => {
+    setIsLoading(true);
+    setError('');
+
+    if (type === UserType.ADMIN) {
+        try {
+            
+            await axios.post('/users', userData);
+            setError('');
+            setIsLoading(false);
+        } catch {
+            setError('Error while adding user');
+            setIsLoading(false);
+        }
+    } else if (type === UserType.CONTENT_MANAGER) {
+        try {
+            await axios.post('/users/cm', userData);
+            setError('');
+            setIsLoading(false);
+        } catch {
+            setError('Error while adding user');
+            setIsLoading(false);
+        }
+    }
+    else if (type === UserType.SUPER_ADMIN) {
+        try {
+            await axios.post('/users/sa', userData);
+            setError('');
+            setIsLoading(false);
+        } catch {
+            setError('Error while adding user');
+            setIsLoading(false);
+        }
+    }
+
+    throw new Error(`No implementation for given ${type} type`);
+}
+```
+
+> OK - Function only manages entire process - code is easy to understand because of named functions. Also can be reused in other handlers.
+```ts
+enum UserType {
+    ADMIN = 'ADMIN',
+    CONTENT_MANAGER = 'CONTENT_MANAGER',
+    SUPER_ADMIN = 'SUPER_ADMIN'
+}
+
+const initialize = () => {
+    setIsLoading(true);
+    setError('');
+};
+
+const handleSucces = () => {
+    setIsLoading(false);
+    setError('');
+}
+
+const handleError = (error: string) => {
+    setIsLoading(false);
+    setError(error);
+}
+
+const saveUser = (path: string, payload: any) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await axios.post(path, payload);
+            resolve()
+        }
+        catch {
+            reject('Error occured');
+        }
+    });
+}
+
+const getPath = (type) => {
+    const paths = {
+        [UserType.ADMIN]: 'users',
+        [UserType.CONTENT_MANAGER]: 'cm',
+        [UserType.SUPER_ADMIN]: 'sa',
+    };
+
+    return paths[type];
+}
+
+const parsePayload = (userData: Object) => ({
+    ...userData
+    // SOME PARSING LOGIC
+})
+
+const handleSaveUser = (type: UserType) => {
+    initialize();
+    saveUser(getPath(type), parsePayload(userData)).then(handleSucces, handleError);
+
+    throw new Error(`No implementation for given ${type} type`);
+}
+```
+
 ### Composition over inheritance
