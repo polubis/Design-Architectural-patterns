@@ -423,6 +423,8 @@ const calc = (a, b) => a + b;
 
 ### Code Against Interfaces, Not Implementations
 
+<img src="https://www.flaticon.com/svg/static/icons/svg/3443/3443998.svg" height="48" width="48">
+
 *"The more loosely coupled your code is, the less likely it is that a change in one place will affect code in another."*
 
 *"You can replace the implementation with a better one without breaking anything."*
