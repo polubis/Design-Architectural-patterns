@@ -1021,6 +1021,76 @@ export const List = ({ children = ListItem, items }: ListProps) => {
 <List children={MyOwnChildren} items={items} />
 ```
 
+#### Liskov substitution principle
+
+<img src="https://www.flaticon.com/premium-icon/icons/svg/2566/2566163.svg" height="48" width="48">
+
+*"Your bathtub has a leak. You call the plumber and he puts the seal on. Then your father comes and says, Lord, who pays for these things. He removes the earlier plumber and the heat sink in the pipes for some reason. Looks like it works but after hour your neighbor has a swimming pool in the apartment."*
+
+Subclass should override the parent class methods in a way that does not break functionality from a client’s point of view.
+
+##### Invalid spread usage
+
+> BAD - spread operator overwrites formatter method
+```ts
+type Formatter = (value: number) => string;
+
+const objWithSameProperty = {
+    formatter: () => {
+        // SOME ULTRA IMPORTANT METHOD
+    }
+}
+
+const applyFormatter = <T>(obj: T): T & { formatter: Formatter } => {
+    const formatter: Formatter = (value) => value.toFixed(2);
+
+    return {
+        ...obj,
+        formatter
+    }
+}
+
+// FEATURE DESTROYED
+const enhancedObj = applyFormatter(objWithSameProperty);
+```
+
+> OK - formatter property never changed also developer friendly error displayed in console - no need to throw an error
+```ts
+type Formatter = (value: number) => string;
+
+const objWithSameProperty = {
+    data: null,
+    formatter: () => {
+        // SOME ULTRA IMPORTANT METHOD
+        return '0';
+    }
+}
+
+const applyFormatter = <T>(obj: T & { formatter?: Formatter }): T & { formatter: Formatter } => {
+    const formatter: Formatter = (value) => value.toFixed(2);
+
+    if (!obj.formatter) {
+        console.log('Formatter property is already defined for given object');
+    }
+
+    return {
+        formatter,
+        ...obj,
+    }
+}
+
+// FEATURE DESTROYED
+const enhancedObj = applyFormatter(objWithSameProperty);
+```
+
+#### Interface segregation principle
+
+*""*
+
+#### Dependency Inversion principle
+
+*""*
+
 ##### Component 
 
 ### Composition over inheritance
