@@ -570,7 +570,7 @@ export const ThemedButton: Button = (props) => {
 
 *"ALL WE HAD TO DO WAS FOLLOW THE DAMN TRAIN CJ"*
 
-`class`, `function`, `module`, `object` should only have one job.
+`class`, `function`, `module` should only have one job.
 
 ##### One class doing too many things
 
