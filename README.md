@@ -564,7 +564,7 @@ export const ThemedButton: Button = (props) => {
 
 ### SOLID
 
-<img src="https://www.flaticon.com/premium-icon/icons/svg/2913/2913995.svg" height="48" width="48">
+<img src="https://www.flaticon.com/svg/static/icons/svg/3076/3076553.svg" height="48" width="48">
 
 #### SRP - Single responsiblity principal
 
