@@ -1083,9 +1083,316 @@ const applyFormatter = <T>(obj: T & { formatter?: Formatter }): T & { formatter:
 const enhancedObj = applyFormatter(objWithSameProperty);
 ```
 
+##### Problem with extension
+
+> BAD - `DesktopCalculator` changes implementation of `Calculator` abstract class - feature destroyed
+```ts
+abstract class Calculator {
+    add(): void {
+        console.log('Adding operation');
+    }
+
+    diff(): void {
+
+    }
+
+    multiply(): void {}
+}
+
+class DesktopCalculator extends Calculator {
+    add(): void {
+        console.log('Adds calculator to DOM');
+    }
+}
+
+const desktopCalculator = new DesktopCalculator();
+desktopCalculator.add();
+```
+
+> OK - composition over inheritance. No risk to overwrite
+```ts
+interface ICalculator {
+    add(): void;
+    diff(): void;
+    multiply(): void;
+}
+
+class Calculator implements ICalculator {
+    add(): void {
+        console.log('Adding operation');
+    }
+
+    diff(): void {
+
+    }
+
+    multiply(): void { }
+}
+
+class DesktopCalculator {
+    constructor(public calculator: ICalculator) {
+
+    }
+
+    add(): void {
+        console.log('Adds calculator to DOM');
+    }
+}
+
+const desktopCalculator = new DesktopCalculator(new Calculator());
+desktopCalculator.add();
+```
+
+##### Problem in React component
+
+> BAD - `handleMouseOver` never used if someone pass onMouseOver property to component
+```ts
+export interface InputProps
+  extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
+  status?: 'valid' | 'invalid';
+}
+
+export const Input = ({ status, ...inputProps }: InputProps) => {
+  const handleMouseOver = (e: React.MouseEvent<HTMLInputElement, MouseEvent>): void => {
+    // IMPORTANT EVENT HANDLER NEVER BE USED
+  }
+
+  const className = [
+    csx.input,
+    status === 'invalid' ? csx.invalid : '',
+    status === 'valid' ? csx.valid : ''
+  ].join(' ');
+
+  return (
+    <div className={className}>
+      <input onMouseOver={handleMouseOver} {...inputProps} />
+      {status === 'invalid' && <WarningIcon />}
+      {status === 'valid' && <DoneIcon />}
+    </div>
+  );
+};
+```
+
+> OK - no risk of overwriting functionality. Inner component implementation handles event and after handle calls passed onMouseOver handler
+```ts
+export interface InputProps
+  extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
+  status?: 'valid' | 'invalid';
+}
+
+export const Input = ({ status, ...inputProps }: InputProps) => {
+  const handleMouseOver = (e: React.MouseEvent<HTMLInputElement, MouseEvent>): void => {
+    // IMPORTANT EVENT HANDLER NEVER BE USED
+    if (inputProps.onMouseOver) {
+      inputProps.onMouseOver(e);
+    }
+  }
+
+  const className = [
+    csx.input,
+    status === 'invalid' ? csx.invalid : '',
+    status === 'valid' ? csx.valid : ''
+  ].join(' ');
+
+  return (
+    <div className={className}>
+      <input {...inputProps} onMouseOver={handleMouseOver} />
+      {status === 'invalid' && <WarningIcon />}
+      {status === 'valid' && <DoneIcon />}
+    </div>
+  );
+};
+```
+
 #### Interface segregation principle
 
-*""*
+<img src="https://www.flaticon.com/premium-icon/icons/svg/2499/2499312.svg" height="48" width="48">
+
+*"You're out shopping. All you need for eggs, cereals and milk. You look at promotions and come out with a whole shopping basket".*
+
+The code should be designed so that it does not require from developer to provide additional unused parameters.
+
+##### Not needed properties in configuration object
+
+> BAD - `Form` class requires `listeners`, `loggers` parameters always
+```ts
+interface Enumerable {
+    length: number;
+}
+
+interface FormConfigItem {
+    label: string;
+    idx: number;
+    value: any;
+    fns: Function[];
+}
+
+class Form {
+    constructor(config: Object, listeners: Function[], loggers: Function[]) {}
+}
+
+const req = v => !!v;
+const minLength = (length: number) => (value: Enumerable) => value.length > length;
+
+const formConfig: FormConfigItem[] = [
+    { label: 'Username', idx: 0, value: '', fns: [req, minLength(2)] },
+    { label: 'Email', idx: 1, value: '', fns: [req, minLength(2)] },
+    { label: 'Password', idx: 2, value: '', fns: [req, minLength(2)] },
+    { label: 'Repeated password', idx: 3, value: '', fns: [req, minLength(2)] },
+];
+
+const listeners = [];
+const loggers = [];
+
+const form = new Form(formConfig, listeners, loggers);
+```
+
+> OK - pure constructor takes only what is needed for `Form` class. All additional logic is added via functions
+```ts
+
+interface Enumerable {
+    length: number;
+}
+
+interface FormConfigItem {
+    label: string;
+    idx: number;
+    value: any;
+    fns: Function[];
+}
+
+class Form {
+    private _listeners: Function[] = [];
+    private _loggers: Function[] = [];
+
+    constructor(config: Object) { }
+
+    addListeners(listener: Function): void {
+        this._listeners.push(listener);
+    }
+
+    addLoggers(logger: Function): void {
+        this._loggers.push(logger);
+    }
+}
+
+const req = v => !!v;
+const minLength = (length: number) => (value: Enumerable) => value.length > length;
+
+const formConfig: FormConfigItem[] = [
+    { label: 'Username', idx: 0, value: '', fns: [req, minLength(2)] },
+    { label: 'Email', idx: 1, value: '', fns: [req, minLength(2)] },
+    { label: 'Password', idx: 2, value: '', fns: [req, minLength(2)] },
+    { label: 'Repeated password', idx: 3, value: '', fns: [req, minLength(2)] },
+];
+
+
+const form = new Form(formConfig);
+form.addLoggers(() => { console.log('Hi from logger') });
+form.addListeners(() => {
+    console.log('Hi from listener')
+})
+```
+
+##### Not needed properties
+
+> BAD - idx, label properties should be optional
+```ts
+interface FormConfigItem {
+    label: string;
+    idx: number;
+    value: any;
+    fns: Function[];
+}
+
+const formConfig: FormConfigItem[] = [
+    { label: 'Username', idx: 0, value: '', fns: [req, minLength(2)] },
+    { label: 'Email', idx: 1, value: '', fns: [req, minLength(2)] },
+    { label: 'Password', idx: 2, value: '', fns: [req, minLength(2)] },
+    { label: 'Repeated password', idx: 3, value: '', fns: [req, minLength(2)] },
+];
+```
+
+> OK - label marked as optional and idx removed
+```ts
+const req = v => !!v;
+const minLength = (length: number) => (value: Enumerable) => value.length > length;
+
+interface FormConfigItem {
+    label?: string;
+    value: any;
+    fns: Function[];
+}
+
+const formConfig: FormConfigItem[] = [
+    { value: '', fns: [req, minLength(2)] },
+    { value: '', fns: [req, minLength(2)] },
+    { value: '', fns: [req, minLength(2)] },
+    { value: '', fns: [req, minLength(2)] },
+];
+```
+
+##### Data normaliaztion / structure issues
+
+> BAD - some properties are not needed on component initialization. Also open / closed principle issue - no methods for dynamically add events. Also too many informations in single interface - should be separated.
+```ts
+interface Settings {
+    emitStrategy: 0 | 1;
+    events: Partial<{
+        onClick: Function;
+        onSubmit: Function;
+    }>;
+    target: HTMLElement;
+}
+
+class DOMListener {
+    constructor(private _settings: Settings) {}
+}
+
+const domListener = new DOMListener({
+    emitStrategy: 1,
+    target: document.body,
+    events: {
+        onClick: () => { }
+    }
+});
+```
+
+> OK - Not needed properties from configuration removed. Some interfaces added to improve readability and later usage. Method to dynamically add events added.
+```ts
+type SettingsEvents = Partial<{
+    onClick: Function;
+    onSubmit: Function;
+}>;
+
+enum EmitStrategy {
+    INSTANT = 0,
+    DEBOUNCED = 1
+}
+
+interface Settings {
+    emitStrategy?: EmitStrategy;
+    events?: SettingsEvents;
+    target: HTMLElement;
+}
+
+class DOMListener {
+    constructor(private _settings: Settings) { }
+
+    addEvents(events: SettingsEvents): void {
+        this._settings = {
+            ...this._settings, events: {
+                ...this._settings.events,
+                ...events,
+            }
+        }
+    }
+}
+
+const domListener = new DOMListener({
+    target: document.body,
+});
+```
 
 #### Dependency Inversion principle
 
