@@ -881,7 +881,7 @@ export default ErrorBoundary;
 
 #### Open/closed principle - Open for extenstion / closed for modification
 
-<img src="https://www.flaticon.com/premium-icon/icons/svg/1376/1376390.svg" height="48" width="48">
+<img src="https://www.flaticon.com/svg/static/icons/svg/1169/1169906.svg" height="48" width="48">
 
 *"Imagine you have a bad employee. It is much easier to find a new one than to teach someone with bad habits. The person with bad habits is implementation."*
 
