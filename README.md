@@ -1396,8 +1396,300 @@ const domListener = new DOMListener({
 
 #### Dependency Inversion principle
 
-*""*
+<img src="https://www.flaticon.com/svg/static/icons/svg/2689/2689634.svg" height="48" width="48">
 
-##### Component 
+*"You like some girl but you are ashamed. You ask your friend to do it for you. A colleague is an abstraction."*
+
+Entities must depend on abstractions not on concretions. Principle focused on code decoupling.
+
+##### Invalid component properties
+
+> BAD - component contains some logic. Because of that - we cannot reuse `BreadCrumbs` component.
+```ts
+interface Item {
+  children: string;
+  to: string;
+}
+
+const isGuid = (url: string) => url.includes('-');
+
+const makeBreadCrumbs = (url: string): Item[] => {
+  const urls = url.replace('/app/', '').split('/');
+
+  return urls
+    .map((part) => (isGuid(part) ? 'details' : part))
+    .map(
+      (part, i) =>
+        ({
+          children: part,
+          to: `/app/${urls.slice(0, i + 1).join('/')}`
+        } as Item)
+    );
+};
+
+namespace BreadCrumbs {
+  export interface Props {
+    pathname: string;
+  }
+}
+
+const BreadCrumbs = memo(
+  ({ pathname }: BreadCrumbs.Props) => (
+    <div className={csx.breadCrumbs}>
+      {makeBreadCrumbs(pathname).map((item, idx) => (
+        <React.Fragment key={idx}>
+          <Link {...item} />
+          <div className={csx.divider}>{'>'}</div>
+        </React.Fragment>
+      ))}
+    </div>
+  ),
+  (prev, curr) => prev.pathname === curr.pathname
+);
+
+export default BreadCrumbs;
+```
+
+> OK - component is reusable. Takes `items` property and don't care about implementation details.
+```ts
+namespace BreadCrumbs {
+  export interface Item {
+    children: string;
+    to: string;
+  }
+
+  export interface Props {
+    items: Item[];
+  }
+}
+
+const BreadCrumbs = memo(
+  ({ items }: BreadCrumbs.Props) => (
+    <div className={csx.breadCrumbs}>
+      {items.map((item, idx) => (
+        <React.Fragment key={idx}>
+          <Link {...item} />
+          <div className={csx.divider}>{'>'}</div>
+        </React.Fragment>
+      ))}
+    </div>
+  ),
+  (prev, curr) => prev.items === curr.items
+);
+```
+
+##### Class depends on concretions
+
+> BAD - every chart type rely on hard coded `ChartRenderer`. We cannot change render behaviour. Also `data` model is static - always `number[][]` array. There can be some other data types used in other charts.
+```ts
+enum ChartType {
+  Bar = "BAR",
+  Linear = "LINEAR",
+  TableBased = "TABLE_BASED",
+}
+
+interface Chart {
+  data: number[][];
+  update(data: number[][]): void;
+  insert(target: HTMLElement): void;
+}
+
+class BarChart implements Chart {
+  renderer = new ChartRenderer();
+
+  constructor(public data: number[][]) {}
+
+  update(data: number[][]): void {
+    this.data = data;
+    this.renderer.render();
+  }
+
+  insert(target: HTMLElement): void {
+    target.appendChild(this.renderer.render())
+  }
+}
+
+class LinearChart implements Chart {
+  renderer = new ChartRenderer();
+
+  constructor(public data: number[][]) {}
+
+  update(data: number[][]): void {
+    this.data = data;
+  }
+
+  insert(target: HTMLElement): void {
+    target.appendChild(this.renderer.render())
+  }
+}
+
+class ChartRenderer {
+  render(): Node {}
+}
+
+class TableBasedChart implements Chart {
+  renderer = new ChartRenderer();
+
+  constructor(public data: number[][]) {}
+
+  update(data: number[][]): void {
+    this.data = data;
+  }
+
+  insert(target: HTMLElement): void {
+    target.appendChild(this.renderer.render())
+  }
+}
+
+class ChartsFactory {
+  public create(type: ChartType, data: number[][]) {
+    if (type === ChartType.Bar) {
+      return new BarChart(data);
+    } else if (type === ChartType.Linear) {
+      return new LinearChart(data);
+    } else if (type === ChartType.TableBased) {
+      return new TableBasedChart(data);
+    }
+  }
+}
+
+const factory = new ChartsFactory();
+
+const bar = factory.create(ChartType.Bar, [[]]);
+const linear = factory.create(ChartType.Linear, [[]]);
+const tableBased = factory.create(ChartType.TableBased, [[]]);
+
+bar.insert(document.getElementById('id1'));
+bar.insert(document.getElementById('id2'));
+bar.insert(document.getElementById('id3'));
+```
+
+> OK - fully focused on composition. Right now factory takes `class constructor` handles objects creation. Also different types of `Renderer` can be injected via dedicated `Chart` constructor. `ChartsFactory` uses `static` method to create charts.
+```ts
+enum ChartType {
+  Bar = "BAR",
+  Linear = "LINEAR",
+  TableBased = "TABLE_BASED",
+}
+
+interface Chart<T> {
+  insert(data: T, target: HTMLElement): void;
+}
+
+class BarChart implements Chart<number[][]> {
+  private _data: number[][];
+
+  constructor(private _renderer: RenderAble) {}
+
+  insert(data: number[][], target: HTMLElement): void {
+    this._data = data;
+    target.appendChild(this._renderer.render());
+  }
+}
+
+class LinearChart implements Chart<number[][]> {
+  private _data: number[][];
+
+  constructor(private _renderer: RenderAble) {}
+
+  insert(data: number[][], target: HTMLElement): void {
+    this._data = data;
+    target.appendChild(this._renderer.render());
+  }
+}
+
+interface RenderAble {
+  render(): Node;
+}
+
+class TableBasedChart implements Chart<string[][]> {
+  private _data: string[][];
+
+  constructor(private _renderer: RenderAble) {}
+
+  insert(data: string[][], target: HTMLElement): void {
+    this._data = data;
+    target.appendChild(this._renderer.render());
+  }
+}
+
+type ChartConstruct<T> = new (renderer: RenderAble) => Chart<T>;
+
+class ChartsFactory {
+  static create<T>(
+    ChartClass: ChartConstruct<T>,
+    renderer: RenderAble
+  ): Chart<T> {
+    return new ChartClass(renderer);
+  }
+}
+
+export const bar = ChartsFactory.create<number[][]>(BarChart, {
+  render: () => document.createTextNode("div"),
+});
+
+export const linear = ChartsFactory.create<number[][]>(LinearChart, {
+  render: () => document.createTextNode("section"),
+});
+
+export const tableBased = ChartsFactory.create<string[][]>(TableBasedChart, {
+  render: () => document.createTextNode("table"),
+});
+
+bar.insert([[]], document.getElementById("id1"));
+linear.insert([[]], document.getElementById("id2"));
+tableBased.insert([[]], document.getElementById("id3"));
+```
+
+##### Api layer issue
+
+> BAD
+```ts
+const makeInstance = (config: AxiosRequestConfig) => (
+  parseSuccess: Api.Parser.Success,
+  parseError: Api.Parser.Error
+) => (errorsBlackList: string[]): Api.Instance => {
+  let subscriber: Api.Subscriber = null;
+
+  const notify = (err: any) => {
+    subscriber(err);
+  };
+
+  const cutUrl = (url: string) => {
+    const queryIdx = url.indexOf("?");
+    return queryIdx > -1 ? url.slice(0, queryIdx) : url;
+  };
+
+  const handleParseError = (err: AxiosError) => {
+    const parsed = parseError(err);
+
+    const url = cutUrl(err.response.config.url);
+
+    if (!errorsBlackList.includes(url)) {
+      notify(parsed);
+    }
+
+    return Promise.reject(parsed);
+  };
+
+  const subscribe = (newSubscriber: Api.Subscriber) => {
+    subscriber = newSubscriber;
+  };
+
+  const unsubscribe = () => {
+    subscriber = null;
+  };
+
+  const instance = Axios.create(config) as Api.Instance;
+
+  instance.interceptors.response.use(
+    (res) => parseSuccess(res),
+    (err) => handleParseError(err)
+  );
+
+  return { ...instance, subscribe, unsubscribe } as Api.Instance;
+};
+```
+
 
 ### Composition over inheritance
