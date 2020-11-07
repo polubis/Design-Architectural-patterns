@@ -1643,7 +1643,7 @@ tableBased.insert([[]], document.getElementById("id3"));
 
 ##### Api layer issue
 
-> BAD
+> BAD - `makeInstance` rely on axios. No abstraction provided to avoid issues when migrating to other library.
 ```ts
 const makeInstance = (config: AxiosRequestConfig) => (
   parseSuccess: Api.Parser.Success,
@@ -1688,6 +1688,65 @@ const makeInstance = (config: AxiosRequestConfig) => (
   );
 
   return { ...instance, subscribe, unsubscribe } as Api.Instance;
+};
+```
+
+> OK - observable utils created. `makeInstance` right now is not needed because we can directly import `from` function and enhance every object interface.
+```ts
+interface Subscriber {
+  id: string;
+  fn: Function;
+}
+
+type Subscribe = (subscriber: Function) => Function;
+
+type Next = <T>(value: T) => void;
+
+interface SubscribeAble {
+  next: Next;
+  subscribe: Subscribe;
+}
+
+type Candidate<T> = {
+  [K in keyof T]: T[K];
+} &
+  Partial<SubscribeAble>;
+
+type Observable<T extends Candidate<T>> = T & SubscribeAble;
+
+const isAbleToEnhance = <T extends Candidate<T>>(obj: T): void => {
+  if (obj.subscribe !== undefined || obj.next !== undefined) {
+    console.error("Object already implements Observable interface");
+  }
+};
+
+const from = <T extends Candidate<T>>(obj: T): Observable<T> => {
+  isAbleToEnhance(obj);
+
+  let subscribers: Subscriber[] = [];
+
+  const subscribe: Subscribe = (fn) => {
+    const subscriber: Subscriber = {
+      id: "" + new Date().getUTCMilliseconds(),
+      fn,
+    };
+
+    subscribers.push(subscriber);
+
+    return () => {
+      subscribers = subscribers.filter(({ id }) => id !== subscriber.id);
+    };
+  };
+
+  const next: Next = (value) => {
+    subscribers.forEach((sb) => sb.fn(value));
+  };
+
+  return {
+    next,
+    subscribe,
+    ...obj,
+  };
 };
 ```
 
