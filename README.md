@@ -1711,6 +1711,10 @@ Prefer composition over inheritance as it is more malleable / easy to modify lat
 
 #### Inheritance
 
+```ts
 
+```
+
+#### Composition
 
 
