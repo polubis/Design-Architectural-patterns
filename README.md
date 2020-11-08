@@ -12,7 +12,7 @@ Repeating the same code in the application may considerably take longer to make 
 
 #### Styles
 
-> BAD - duplication in css causes issues with changing layout - designer change his mind
+> BAD - duplication in css causes issues with changing layout - designer change his mind.
 ```scss
 // in modal.scss
 h2 {
@@ -40,7 +40,7 @@ h2 {
 // in datepicker.scss
 ```
 
-> ACCEPTABLE - duplication only in two files
+> ACCEPTABLE - duplication only in two files.
 ```scss
 // in modal.scss
 h2 {
@@ -61,7 +61,7 @@ h2 {
 } 
 ```
 
-> OK - mixins used to avoid any code duplication - we can compose our css rules
+> OK - mixins used to avoid any code duplication - we can compose our css rules.
 ```scss
 @mixin text {
   font-family: $fontPrimary;
@@ -87,7 +87,7 @@ h2 {
 
 #### Constant files
 
-> BAD - helper function `makePaths` makes code hard to read - also if someone change implementation - app destroyed
+> BAD - helper function `makePaths` makes code hard to read - also if someone change implementation - app destroyed.
 ```ts
 export const [FORGOTTEN_PASSWORD, REGISTER, GET_SELF] = makePaths('Account')(
   'ForgottenPassword',
@@ -100,7 +100,7 @@ export const [GET_PATTERNS, EDIT_PATTERN, ADD_PATTERN, GET_PATTERN, DELETE_PATTE
 )('Search', 'Update', 'Add', 'Get', 'Delete');
 ```
 
-> ACCEPTABLE - duplication easy to change via code editor
+> ACCEPTABLE - duplication easy to change via code editor.
 ```ts
 const FORGOTTEN_PASSWORD = 'Account/ForgottenPassword';
 const REGISTER = 'Account/Register';
@@ -118,7 +118,7 @@ const GET_SELF = `${CONTROLLER}/GetCurrentUserData`;
 
 #### React component guards
 
-> BAD - check user admin / rendering children features are duplicated / hard to read nested ternary operator
+> BAD - check user admin / rendering children features are duplicated / hard to read nested ternary operator.
 ```ts
 const Admin = ({ children }: Guard.Props) => {
   const { pending, authorized, ...state } = useAuthProvider();
@@ -161,7 +161,7 @@ const Unprotected = ({ children }: Guard.Props) => {
 // and 5 more guard types 
 ```
 
-> ACCEPTABLE - some code duplication / but only in two places so who cares
+> ACCEPTABLE - some code duplication / but only in two places so who cares.
 ```ts
 const Admin = ({ children }: Guard.Props) => {
   const { pending, authorized, ...state } = useAuthProvider();
@@ -190,7 +190,7 @@ const Protected = ({ children }: Guard.Props) => {
 };
 ```
 
-> OK - 2 helpers functions created / guards code easier to read / redundant logic is implemented in helper functions
+> OK - 2 helpers functions created / guards code easier to read / redundant logic is implemented in helper functions.
 ```ts
 const isAdmin = (roles: string[]): boolean => roles.includes(UserRole.Admin);
 
@@ -226,7 +226,7 @@ const Unprotected = ({ children }: Guard.Props) => {
 
 #### Tests
 
-> BAD - **should** and **correctly** keywords not needed
+> BAD - **should** and **correctly** keywords not needed.
 ```ts
 it('should create component correctly', () => {});
 it('should add className correctly', () => {});
@@ -237,7 +237,7 @@ it('should off redirect after success response', () => {});
 it('should show error dialog after failure response', () => {});
 ```
 
-> ACCEPTABLE - **should** and **correctly** keywords removed
+> ACCEPTABLE - **should** and **correctly** keywords removed.
 ```ts
 it('creates component', () => {});
 it('adds className', () => {});
@@ -248,7 +248,7 @@ it('redirects after success response', () => {});
 it('shows error dialog after failure response', () => {});
 ```
 
-> OK - tests grouped / duplicated text removed / easy to read
+> OK - tests grouped / duplicated text removed / easy to read.
 ```ts
 it('creates component', () => {});
 it('adds className', () => {});
@@ -265,9 +265,9 @@ describe('on failure', () => {
 
 #### Worst case - duplicated business logic
 
-There is no **ACCEPTABLE** case. Whenever you duplicate a business logic - you are doing something wrong
+There is no **ACCEPTABLE** case. Whenever you duplicate a business logic - you are doing something wrong.
 
-> BAD - only difference in view layer - business logic code duplicated. Hard to track bugs
+> BAD - only difference in view layer - business logic code duplicated. Hard to track bugs.
 ```ts
   const FormVariantA = () => {
     const {
@@ -338,7 +338,7 @@ There is no **ACCEPTABLE** case. Whenever you duplicate a business logic - you a
   }
 ```
 
-> OK - logic grouped in hook - easy to use between different components
+> OK - logic grouped in hook - easy to use between different components.
 ```ts
 export const useTemplateManagement = (): Return => {
   const {
@@ -409,7 +409,7 @@ const calc = (a, b) => a + b;
 
 #### Overcomplicated code
 
-> BAD - **closures / currying** are really good - but not in this case - this is used without any purpose
+> BAD - **closures / currying** are really good - but not in this case - this is used without any purpose.
 ```ts
   const add = a => b => c => a + b + c + d;
   add(5)(5)(5)(5) // 20
@@ -472,7 +472,7 @@ const user: IUser = new User('piotr', 'I like programming');
 
 #### Coupled code issue - problems with refactor / implementation change
 
-> BAD - class `Car` rely on implementation - if `DriveManager` implementation changes, `n` files behaviour changed
+> BAD - class `Car` rely on implementation - if `DriveManager` implementation changes, `n` files behaviour changed.
 ```ts
   class Car {
     drive = new DriveManager();
@@ -486,7 +486,7 @@ const user: IUser = new User('piotr', 'I like programming');
   const car = new Car();
 ```
 
-> OK - class `Car` rely on `interface` - if `DriveManager` implementation changes, only 1 file affected
+> OK - class `Car` rely on `interface` - if `DriveManager` implementation changes, only 1 file affected.
 ```ts
  interface DriveAble {
    drive(): void;
@@ -506,7 +506,7 @@ const user: IUser = new User('piotr', 'I like programming');
 
 #### React components issue
 
-> BAD - if you change ButtonType enum or implementation inside button component - ui will be broken
+> BAD - if you change ButtonType enum or implementation inside button component - ui will be broken.
 ```ts
 enum ButtonType = {
   PRIMARY = 'primary',
@@ -576,7 +576,7 @@ export const ThemedButton: Button = (props) => {
 
 ##### One class doing too many things
 
-> BAD - class `User` doing 2 things - loads user data and holds user information
+> BAD - class `User` doing 2 things - loads user data and holds user information.
 ```ts
 class User {
     name: string;
@@ -646,7 +646,7 @@ userController.handleLoadUser().then((user) => {
 
 ##### Function doing too many things
 
-> BAD - The function has 3 responsibilities. Manages entire process of adding a user, deals with API processing and payload formatting
+> BAD - The function has 3 responsibilities. Manages entire process of adding a user, deals with API processing and payload formatting.
 ```ts
 enum UserType {
     ADMIN = 'ADMIN',
@@ -753,7 +753,7 @@ const handleSaveUser = (type: UserType) => {
 
 ##### Module doing too many things
 
-> BAD - module have 2 responsibilities - error handling and display hard coded component - determines component look
+> BAD - module have 2 responsibilities - error handling and display hard coded component - determines component look.
 ```ts
 namespace ErrorBoundary {
   export interface Props {
@@ -820,7 +820,7 @@ export default ErrorBoundary;
 <ErrorBoundary><Component /></ErrorBoundary>
 ```
 
-> OK - presentational component is injected via props - only one job handle error
+> OK - presentational component is injected via props - only one job handle error.
 ```ts
 namespace ErrorBoundary {
   export interface Props {
@@ -889,7 +889,7 @@ Objects or entities should be open for extension, but closed for modification. T
 
 ##### Hello world examples
 
-> BAD - there is not option to add new user dynamically - closed for extension
+> BAD - there is not option to add new user dynamically - closed for extension.
 ```ts
 export const usersManager = () => {
   const users = ['Piotr', 'Pawel', 'Adam'];
@@ -916,7 +916,7 @@ export const usersManager = () => {
 
 ##### Bucket feature
 
-> BAD - only one formatter allowed - if we would like to change formatter behaviour we need to open this file and add changes. Also this can break all current `Bucket` base features because we need this change only in once place
+> BAD - only one formatter allowed - if we would like to change formatter behaviour we need to open this file and add changes. Also this can break all current `Bucket` base features because we need this change only in once place.
 ```ts
 interface Item {
     id: number;
@@ -986,7 +986,7 @@ const List = ({ items }: ListProps) => {
 <List items={items} />
 ```
 
-> OK - if we need new list type - we just passing Component / Function as a children - no changes required in implementation
+> OK - if we need new list type - we just passing Component / Function as a children - no changes required in implementation.
 ```ts
 export interface ListItem {
   label: string;
@@ -1054,7 +1054,7 @@ const applyFormatter = <T>(obj: T): T & { formatter: Formatter } => {
 const enhancedObj = applyFormatter(objWithSameProperty);
 ```
 
-> OK - formatter property never changed also developer friendly error displayed in console - no need to throw an error
+> OK - formatter property never changed also developer friendly error displayed in console - no need to throw an error.
 ```ts
 type Formatter = (value: number) => string;
 
@@ -1085,7 +1085,7 @@ const enhancedObj = applyFormatter(objWithSameProperty);
 
 ##### Problem with extension
 
-> BAD - `DesktopCalculator` changes implementation of `Calculator` abstract class - feature destroyed
+> BAD - `DesktopCalculator` changes implementation of `Calculator` abstract class - feature destroyed.
 ```ts
 abstract class Calculator {
     add(): void {
@@ -1109,7 +1109,7 @@ const desktopCalculator = new DesktopCalculator();
 desktopCalculator.add();
 ```
 
-> OK - composition over inheritance. No risk to overwrite
+> OK - composition over inheritance. No risk to overwrite.
 ```ts
 interface ICalculator {
     add(): void;
@@ -1145,7 +1145,7 @@ desktopCalculator.add();
 
 ##### Problem in React component
 
-> BAD - `handleMouseOver` never used if someone pass onMouseOver property to component
+> BAD - `handleMouseOver` never used if someone pass onMouseOver property to component.
 ```ts
 export interface InputProps
   extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
@@ -1173,7 +1173,7 @@ export const Input = ({ status, ...inputProps }: InputProps) => {
 };
 ```
 
-> OK - no risk of overwriting functionality. Inner component implementation handles event and after handle calls passed onMouseOver handler
+> OK - no risk of overwriting functionality. Inner component implementation handles event and after handle calls passed onMouseOver handler.
 ```ts
 export interface InputProps
   extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
@@ -1214,7 +1214,7 @@ The code should be designed so that it does not require from developer to provid
 
 ##### Not needed properties in configuration object
 
-> BAD - `Form` class requires `listeners`, `loggers` parameters always
+> BAD - `Form` class requires `listeners`, `loggers` parameters always.
 ```ts
 interface Enumerable {
     length: number;
@@ -1247,7 +1247,7 @@ const loggers = [];
 const form = new Form(formConfig, listeners, loggers);
 ```
 
-> OK - pure constructor takes only what is needed for `Form` class. All additional logic is added via functions
+> OK - pure constructor takes only what is needed for `Form` class. All additional logic is added via functions.
 ```ts
 
 interface Enumerable {
@@ -1296,7 +1296,7 @@ form.addListeners(() => {
 
 ##### Not needed properties
 
-> BAD - idx, label properties should be optional
+> BAD - idx, label properties should be optional.
 ```ts
 interface FormConfigItem {
     label: string;
@@ -1313,7 +1313,7 @@ const formConfig: FormConfigItem[] = [
 ];
 ```
 
-> OK - label marked as optional and idx removed
+> OK - label marked as optional and idx removed.
 ```ts
 const req = v => !!v;
 const minLength = (length: number) => (value: Enumerable) => value.length > length;
@@ -1643,7 +1643,7 @@ tableBased.insert([[]], document.getElementById("id3"));
 
 ##### Module dependency issue
 
-> BAD - `AlertsManager` rely on `core` instance by import. When adding a new instance, we have to change the implementation
+> BAD - `AlertsManager` rely on `core` instance by import. When adding a new instance, we have to change the implementation.
 ```ts
 import { Alert } from 'ui';
 
@@ -1669,7 +1669,7 @@ export default AlertsManager;
 
 ```
 
-> OK -
+> OK - relationships between modules have been changed. Additionally, the component has become reusable and declares an interface with the necessary properties.
 ```ts
 import { Alert } from 'ui';
 
