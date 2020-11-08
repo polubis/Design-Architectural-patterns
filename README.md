@@ -1641,114 +1641,64 @@ linear.insert([[]], document.getElementById("id2"));
 tableBased.insert([[]], document.getElementById("id3"));
 ```
 
-##### Api layer issue
+##### Module dependency issue
 
-> BAD - `makeInstance` rely on axios. No abstraction provided to avoid issues when migrating to other library.
+> BAD - `AlertsManager` rely on `core` instance by import. When adding a new instance, we have to change the implementation
 ```ts
-const makeInstance = (config: AxiosRequestConfig) => (
-  parseSuccess: Api.Parser.Success,
-  parseError: Api.Parser.Error
-) => (errorsBlackList: string[]): Api.Instance => {
-  let subscriber: Api.Subscriber = null;
+import { Alert } from 'ui';
 
-  const notify = (err: any) => {
-    subscriber(err);
-  };
+import { core } from '..'; // Should be passed as component property
 
-  const cutUrl = (url: string) => {
-    const queryIdx = url.indexOf("?");
-    return queryIdx > -1 ? url.slice(0, queryIdx) : url;
-  };
+const AlertsManager = () => {
+  const [alert, setAlert] = useState('');
 
-  const handleParseError = (err: AxiosError) => {
-    const parsed = parseError(err);
+  const closeAlert = useCallback(() => {
+    setAlert('');
+  }, []);
 
-    const url = cutUrl(err.response.config.url);
+  useEffect(() => {
+    core.subscribe(setAlert);
 
-    if (!errorsBlackList.includes(url)) {
-      notify(parsed);
-    }
+    return core.unsubscribe;
+  }, []);
 
-    return Promise.reject(parsed);
-  };
-
-  const subscribe = (newSubscriber: Api.Subscriber) => {
-    subscriber = newSubscriber;
-  };
-
-  const unsubscribe = () => {
-    subscriber = null;
-  };
-
-  const instance = Axios.create(config) as Api.Instance;
-
-  instance.interceptors.response.use(
-    (res) => parseSuccess(res),
-    (err) => handleParseError(err)
-  );
-
-  return { ...instance, subscribe, unsubscribe } as Api.Instance;
+  return alert ? <Alert message={alert} onClose={closeAlert} /> : null;
 };
+
+export default AlertsManager;
+
 ```
 
-> OK - observable utils created. `makeInstance` right now is not needed because we can directly import `from` function and enhance every object interface.
+> OK -
 ```ts
-interface Subscriber {
-  id: string;
-  fn: Function;
+import { Alert } from 'ui';
+
+interface Instance {
+  subscribe(fn: Function): void;
+  unsubscribe(): void;
 }
 
-type Subscribe = (subscriber: Function) => Function;
-
-type Next = <T>(value: T) => void;
-
-interface SubscribeAble {
-  next: Next;
-  subscribe: Subscribe;
+interface Props {
+  instance: Instance;
 }
 
-type Candidate<T> = {
-  [K in keyof T]: T[K];
-} &
-  Partial<SubscribeAble>;
+const AlertsManager = ({ instance }: Props) => {
+  const [alert, setAlert] = useState('');
 
-type Observable<T extends Candidate<T>> = T & SubscribeAble;
+  const closeAlert = useCallback(() => {
+    setAlert('');
+  }, []);
 
-const isAbleToEnhance = <T extends Candidate<T>>(obj: T): void => {
-  if (obj.subscribe !== undefined || obj.next !== undefined) {
-    console.error("Object already implements Observable interface");
-  }
+  useEffect(() => {
+    instance.subscribe(setAlert);
+
+    return instance.unsubscribe;
+  }, []);
+
+  return alert ? <Alert message={alert} onClose={closeAlert} /> : null;
 };
 
-const from = <T extends Candidate<T>>(obj: T): Observable<T> => {
-  isAbleToEnhance(obj);
-
-  let subscribers: Subscriber[] = [];
-
-  const subscribe: Subscribe = (fn) => {
-    const subscriber: Subscriber = {
-      id: "" + new Date().getUTCMilliseconds(),
-      fn,
-    };
-
-    subscribers.push(subscriber);
-
-    return () => {
-      subscribers = subscribers.filter(({ id }) => id !== subscriber.id);
-    };
-  };
-
-  const next: Next = (value) => {
-    subscribers.forEach((sb) => sb.fn(value));
-  };
-
-  return {
-    next,
-    subscribe,
-    ...obj,
-  };
-};
+export default AlertsManager;
 ```
-
 
 ### Composition over inheritance
