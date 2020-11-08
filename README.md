@@ -1703,7 +1703,7 @@ export default AlertsManager;
 
 ### Composition over inheritance
 
-<img src="https://www.flaticon.com/svg/static/icons/svg/3221/3221900.svg" height="48" width="48">
+<img src="https://www.flaticon.com/svg/static/icons/svg/1874/1874640.svg" height="48" width="48">
 
 *"Your car broke down. It is much easier to pay a mechanic and collect him than to learn the mechanics yourself."*
 
@@ -1711,10 +1711,18 @@ Prefer composition over inheritance as it is more malleable / easy to modify lat
 
 #### Inheritance
 
+Should be used when you need to expose whole interface. The use of inheritance often results in the formation of **god classes** or the risk of overwriting important properties.
+
+##### 
+
+> BAD - composition will be better
+
 ```ts
 
 ```
 
+> OK
+
 #### Composition
 
-
+Should use when you need some functionality - only fragment.
