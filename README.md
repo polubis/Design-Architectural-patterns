@@ -1710,9 +1710,45 @@ Prefer composition over inheritance as it is more malleable / easy to modify lat
 
 #### Inheritance
 
-Inheritance is a mechanism to define an **is a** relationship
+Inheritance is a mechanism to define an **is a** relationship. 
 
-Should be used when you need to expose whole interface. The use of inheritance often results in the formation of **god classes** or the risk of overwriting important properties. Produces less code than composition.
+Pros:
+- easy to understand when only 1 inheritence level,
+- it works better when we need all the functionality, not a piece.
+
+Cons:
+- hard to reuse logic between classes,
+```ts
+class Animal {
+  eat(): void {}
+  jump(): void {}
+  walk(): void {}
+}
+
+class Spider extends Animal {
+  bite(): void {}
+  injectVenom(): void {}
+  wrapInCocoon(): void {}
+}
+
+class Tarantula extends Animal {
+  createTonsOfChildren(): void {}
+} // OK - Tarantula is typical spider
+
+class BlackWidow extends Spider { // OK - BlackWindow is unique spider
+  eatHusband(): void {}
+}
+
+// RIGHT NOW WE HAVE NEXT GENRE AND HERE IS PROBLEM
+// MutantSpider want `eatHusband` feature and `createTonsOfChildren`
+// Both exists in different spider genres so we need to create helper class for that or add in Spider class but this increases complexity
+class MutantSpider {}
+```
+- **fragile base class** problem, where changes in the state of the base class result in malfunctions in a subclass,
+- poor scalability,
+- risk of overwriting key properties in the base class,
+- in JS and some other language we can inherit only from one class,
+- **god classes** issue. When we need some features across classes we adding these feature inside parent class.
 
 #### Composition
 
