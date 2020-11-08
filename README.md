@@ -1745,8 +1745,43 @@ class BlackWidow extends Spider { // OK - BlackWindow is unique spider
 class MutantSpider {}
 ```
 - **fragile base class** problem, where changes in the state of the base class result in malfunctions in a subclass,
+```ts
+class Animal {
+  eat(): void {}
+  jump(): void {}
+  walk(): void {}
+}
+
+class Spider extends Animal { // Imagine situation when we have 10 classes like this one. If we change implementation of Animal class there is an risk to break our 10 classes.
+  bite(): void {}
+  injectVenom(): void {}
+  wrapInCocoon(): void {}
+  biteAndJump(): void {
+    this.jump();
+    this.walk();
+    this.bite();
+  }
+}
+```
 - poor scalability,
 - risk of overwriting key properties in the base class,
+```ts
+class Animal {
+  eat(): void {}
+  jump(): void {}
+  walk(): void {}
+}
+
+class Spider extends Animal { // Implements own walk method - because of that our feature didn't work
+  bite(): void {}
+  walk(): void {}
+  biteAndJump(): void {
+    this.jump();
+    this.walk();
+    this.bite();
+  }
+}
+```
 - in JS and some other language we can inherit only from one class,
 - **god classes** issue. When we need some features across classes we adding these feature inside parent class.
 
