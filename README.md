@@ -1,3 +1,5 @@
+# Table of contents
+
 - [Some good rules / principles](#some-good-rules---principles)
   * [DRY - Don't Repeat Yourself](#dry---don-t-repeat-yourself)
     + [Styles](#styles)
@@ -36,11 +38,6 @@
   * [Composition over inheritance](#composition-over-inheritance)
     + [Inheritance](#inheritance)
     + [Composition](#composition)
-
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
-
-
 
 ## Some good rules / principles
 
