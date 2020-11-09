@@ -1,5 +1,8 @@
-# Design-Architectural-patterns
+# Table of contents
 
+[Some good rules / principles](#sgrp)  
+
+<a name="sgrp"/>
 ## Some good rules / principles
 
 ### DRY - Don't Repeat Yourself
