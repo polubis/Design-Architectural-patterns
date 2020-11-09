@@ -1,12 +1,49 @@
-# Table of contents
+- [Some good rules / principles](#some-good-rules---principles)
+  * [DRY - Don't Repeat Yourself](#dry---don-t-repeat-yourself)
+    + [Styles](#styles)
+    + [Constant files](#constant-files)
+    + [React component guards](#react-component-guards)
+    + [Tests](#tests)
+    + [Worst case - duplicated business logic](#worst-case---duplicated-business-logic)
+  * [KISS](#kiss)
+    + [This is not KISS issue - just different syntax](#this-is-not-kiss-issue---just-different-syntax)
+    + [Overcomplicated code](#overcomplicated-code)
+  * [Code Against Interfaces, Not Implementations](#code-against-interfaces--not-implementations)
+    + [Issue example](#issue-example)
+    + [Coupled code issue - problems with refactor / implementation change](#coupled-code-issue---problems-with-refactor---implementation-change)
+    + [React components issue](#react-components-issue)
+  * [SOLID](#solid)
+    + [SRP - Single responsiblity principal](#srp---single-responsiblity-principal)
+      - [One class doing too many things](#one-class-doing-too-many-things)
+      - [Function doing too many things](#function-doing-too-many-things)
+      - [Module doing too many things](#module-doing-too-many-things)
+    + [Open/closed principle - Open for extenstion / closed for modification](#open-closed-principle---open-for-extenstion---closed-for-modification)
+      - [Hello world examples](#hello-world-examples)
+      - [Bucket feature](#bucket-feature)
+      - [List component in React](#list-component-in-react)
+    + [Liskov substitution principle](#liskov-substitution-principle)
+      - [Invalid spread usage](#invalid-spread-usage)
+      - [Problem with extension](#problem-with-extension)
+      - [Problem in React component](#problem-in-react-component)
+    + [Interface segregation principle](#interface-segregation-principle)
+      - [Not needed properties in configuration object](#not-needed-properties-in-configuration-object)
+      - [Not needed properties](#not-needed-properties)
+      - [Data normaliaztion / structure issues](#data-normaliaztion---structure-issues)
+    + [Dependency Inversion principle](#dependency-inversion-principle)
+      - [Invalid component properties](#invalid-component-properties)
+      - [Class depends on concretions](#class-depends-on-concretions)
+      - [Module dependency issue](#module-dependency-issue)
+  * [Composition over inheritance](#composition-over-inheritance)
+    + [Inheritance](#inheritance)
+    + [Composition](#composition)
 
-[Some good rules / principles](#sgrp) 
-[DRY - Don't Repeat Yourself](#dry) 
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
-<a name="sgrp"/>
+
+
+
 ## Some good rules / principles
 
-<a name="dry"/>
 ### DRY - Don't Repeat Yourself
 
 <img src="https://www.flaticon.com/svg/static/icons/svg/2654/2654602.svg" height="48" width="48">
