@@ -1,10 +1,12 @@
 # Table of contents
 
-[Some good rules / principles](#sgrp)  
+[Some good rules / principles](#sgrp) 
+[DRY - Don't Repeat Yourself](#dry) 
 
 <a name="sgrp"/>
 ## Some good rules / principles
 
+<a name="dry"/>
 ### DRY - Don't Repeat Yourself
 
 <img src="https://www.flaticon.com/svg/static/icons/svg/2654/2654602.svg" height="48" width="48">
